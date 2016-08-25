@@ -1,7 +1,9 @@
 {
 	"compilerOptions": {
-		"target": "ES5",
-		"module": "commonjs",
+		"target": "ES6",
+		"module": "amd",
 		"sourceMap": false
 	}
+	// ,
+	// "files": ["src/TerrainGenerator.ts", "src/Game.ts"]
 }

@@ -1,3 +1,5 @@
+import {TerrainGenerator} from "./TerrainGenerator";
+
 window.addEventListener('DOMContentLoaded', () => {
     // get the canvas DOM element
     var canvas = <HTMLCanvasElement>document.getElementById('renderCanvas');
@@ -8,6 +10,8 @@ window.addEventListener('DOMContentLoaded', () => {
     var scene = new BABYLON.Scene(engine);
 
     var playerTankMeshes = [];
+
+    var terrainGenerator = new TerrainGenerator();
 
     var camera;
     var meshesLoadedToZ : number = 0;
