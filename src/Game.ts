@@ -1,4 +1,6 @@
 import {TerrainGenerator} from "./TerrainGenerator";
+import {Player} from "./Player";
+import {Loader} from "./Loader";
 
 window.addEventListener('DOMContentLoaded', () => {
     // get the canvas DOM element
@@ -9,164 +11,172 @@ window.addEventListener('DOMContentLoaded', () => {
 
     var scene = new BABYLON.Scene(engine);
 
-    var playerTankMeshes = [];
+    var camera : BABYLON.TargetCamera;
 
-    var terrainGenerator = new TerrainGenerator();
+    var light : BABYLON.Light;
 
-    var camera;
-    var meshesLoadedToZ : number = 0;
-    var loadOffsetZ : number = 0;
+    var loader : Loader;
 
-    var grounds = [];
+    var terrainGenerator : TerrainGenerator;
 
-    var heightMapReady = function(mesh) {
-        console.log("Height map loaded!");
-        // m.position = new BABYLON.Vector3(0, 0, 50);
-        // console.log("Height map " + namePrefix + " loaded!");
-        // m.position = new BABYLON.Vector3(posX, posY, posZ);
-    };
+    var player : Player;
 
-    var createHeightmap = function(namePrefix : string, width : number, height : number, posX : number, posY : number, posZ : number) {
-        console.log("Loading: " + namePrefix);
-        var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-        groundMaterial.diffuseTexture = new BABYLON.Texture("textures/" + namePrefix + "_txt.png", scene);
-
-        var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "textures/" + namePrefix + ".png", width, height, 250, 0, 10, scene, false, heightMapReady);     
-        ground.material = groundMaterial;
-        ground.position.x = posX;
-        ground.position.y = posY;
-        ground.position.z = posZ;
-
-        grounds.unshift(ground);
-    }
+    var useStaticScene : boolean = false;
 
     // createScene function that creates and return the scene
     var createScene = function() {
-        // create a basic BJS Scene object
-
-        // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
-        // var camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 5, -20), scene);
-        // var camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5,-20), scene);
-        camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, 5, -20), scene);
-
-        // target the camera to scene origin
+        camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 5, -20), scene);
+        // camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0, 5, -20), scene);
         // camera.setTarget(BABYLON.Vector3.Zero());
-
-        // attach the camera to the canvas
         camera.attachControl(canvas, false);
 
-        // create a basic light, aiming 0,1,0 - meaning, to the sky
-        var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
+        light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
 
-        // // create a built-in "sphere" shape; its constructor takes 5 params: name, width, depth, subdivisions, scene
-        // var sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
+        loader = new Loader(scene);
+        terrainGenerator = new TerrainGenerator(scene, camera, loader);
+        player = new Player(scene, camera, loader);
 
-        // // move the sphere upward 1/2 of its height
-        // sphere.position.y = 1;
+        terrainGenerator.load();
+        player.load();
 
-        // create skybox
-        // var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
-        // var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
-        // skyboxMaterial.backFaceCulling = false;
-        // skyboxMaterial.disableLighting = true;
-        // skybox.material = skyboxMaterial;   
+        terrainGenerator.initOnScene();
+        player.initOnScene();
 
-        // skybox.infiniteDistance = true;
-
-        // skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-        // skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0); 
-
-        // skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
-        // skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-
-        // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
-        // var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-        // groundMaterial.diffuseTexture = new BABYLON.Texture("textures/terrain_01.png", scene);
-
-        // var groundPlane = BABYLON.Mesh.CreatePlane("groundPlane", 200.0, scene);
-        // groundPlane.material = groundMaterial;
-
-        var posXLeft = -30, posY = 0, posZ = 0,
-            posXRight = 30;
-
-        for (var i = 0; i < 4; ++i) {
-            createHeightmap("terrain_01", 50, 50, posXLeft, posY, posZ);
-            createHeightmap("terrain_02", 50, 50, posXRight, posY, posZ);
-            posZ += 50;
-        }  
-
-        meshesLoadedToZ = posZ;
-        loadOffsetZ = posZ;
-
-        var loader = new BABYLON.AssetsManager(scene);
-        var playerTankLoadTask = loader.addMeshTask("playerTank", "", "../assets/", "WZ213.obj"); 
-        // var teapot = loader.addMeshTask("teapot", "", "../assets/", "teapot.obj");
-        // var playerTank = loader.addMeshTask("tank1", "", "https://groups.csail.mit.edu/graphics/classes/6.837/F03/models/", "teapot.obj");
-
-        var tankLoaded = function(task) {
-            task.loadedMeshes.forEach(function(mesh) {
-                console.log("Loaded tank mesh! " + mesh.name);
-                playerTankMeshes.unshift(mesh);
-                //m.position.x -= position;
-                mesh.position = new BABYLON.Vector3(0, 1, 0);
-                mesh.rotation.y += 3.14;
-                camera.target = mesh;
-            });
-        };   
-
-        playerTankLoadTask.onSuccess = tankLoaded;
-
-        loader.onFinish = function() {
+        loader.registerOnFinishTask(function() {
             scene.registerBeforeRender(update);
             engine.runRenderLoop(function () {
                 scene.render();
             });
-        };
-        loader.load();
+        });
 
-        // return the created scene
         return scene;
     }
 
     var update = function() {
-        var cameraZ = camera.position.z;
-
-        if (cameraZ > meshesLoadedToZ) {
-            for (var ground of grounds) {
-                ground.position.z += loadOffsetZ;
-            }    
-            meshesLoadedToZ += loadOffsetZ;
-
-            // var posXLeft = -30, posY = 0, posZ = meshesLoadedToZ,
-            //     posXRight = 30;
-
-            // for (var i = 0; i < 4; ++i) {
-            //     createHeightmap("terrain_01", 50, 50, posXLeft, posY, posZ);
-            //     createHeightmap("terrain_02", 50, 50, posXRight, posY, posZ);
-            //     posZ += 50;
-            // }  
-
-            // meshesLoadedToZ = posZ;
-        }
-
-        for (var mesh of playerTankMeshes) {
-        // console.log("Updating player tank Z position: " + playerTank.position.z);
-        // if (playerTank && playerTank.position) {
-            mesh.position.z += 0.001;
-        }    
+        if (!useStaticScene) {
+            player.update();
+            terrainGenerator.update();
+        }        
     }
 
     // call the createScene function
     var scene = createScene();
 
-    // run the render loop
-    engine.runRenderLoop(() => {
-        scene.registerBeforeRender(update);
-        scene.render();
-    });
-
     // the canvas/window resize event handler
     window.addEventListener('resize', () => {
         engine.resize();
     });
+
+    // // run the render loop
+    // engine.runRenderLoop(() => {
+    //     scene.registerBeforeRender(update);
+    //     scene.render();
+    // });
+
+    // // create a built-in "sphere" shape; its constructor takes 5 params: name, width, depth, subdivisions, scene
+    // var sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
+
+    // // move the sphere upward 1/2 of its height
+    // sphere.position.y = 1;
+
+    // create skybox
+    // var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
+    // var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+    // skyboxMaterial.backFaceCulling = false;
+    // skyboxMaterial.disableLighting = true;
+    // skybox.material = skyboxMaterial;   
+
+    // skybox.infiniteDistance = true;
+
+    // skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    // skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0); 
+
+    // skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
+    // skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+
+    // create a built-in "ground" shape; its constructor takes the same 5 params as the sphere's one
+    // var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
+    // groundMaterial.diffuseTexture = new BABYLON.Texture("textures/terrain_01.png", scene);
+
+    // var groundPlane = BABYLON.Mesh.CreatePlane("groundPlane", 200.0, scene);
+    // groundPlane.material = groundMaterial;
+
+    // Loading grounds!
+    // groundLoader = new Loader(scene);
+
+    // var groundMesh1 = groundLoader.importGround("textures/terrain_01.png", "textures/terrain_01_txt.png", 50, 50, 250, -10, 20);
+    // var groundMesh2 = groundLoader.importGround("textures/terrain_02.png", "textures/terrain_02_txt.png", 50, 50, 250, -10, 20);
+    // var posXLeft = -30, posY = 0, posZ = 0,
+    //     posXRight = 30;
+    // groundMesh1.position = new BABYLON.Vector3(posXLeft, posY, posZ);
+    // groundMesh2.position = new BABYLON.Vector3(posXRight, posY, posZ);
+
+    // for (var i = 0; i < 4; ++i) {
+    //     posZ += 50;
+    //     var clonedGroundMesh1 = groundLoader.cloneMesh(groundMesh1, i+1, new BABYLON.Vector3(posXLeft, posY, posZ));
+    //     var clonedGroundMesh2 = groundLoader.cloneMesh(groundMesh2, i+1, new BABYLON.Vector3(posXRight, posY, posZ));
+    // }    
+
+    // var posXLeft = -30, posY = 0, posZ = 0,
+    //     posXRight = 30;
+
+    // for (var i = 0; i < 4; ++i) {
+    //     createHeightmap("terrain_01", 50, 50, posXLeft, posY, posZ);
+    //     createHeightmap("terrain_02", 50, 50, posXRight, posY, posZ);
+    //     posZ += 50;
+    // }  
+
+    // meshesLoadedToZ = posZ;
+    // loadOffsetZ = posZ;
+
+    // var loader = new BABYLON.AssetsManager(scene);
+    // var playerTankLoadTask = loader.addMeshTask("playerTank", "", "../assets/", "WZ213.obj"); 
+    // // var teapot = loader.addMeshTask("teapot", "", "../assets/", "teapot.obj");
+    // // var playerTank = loader.addMeshTask("tank1", "", "https://groups.csail.mit.edu/graphics/classes/6.837/F03/models/", "teapot.obj");
+
+    // var tankLoaded = function(task) {
+    //     task.loadedMeshes.forEach(function(mesh) {
+    //         console.log("Loaded tank mesh! " + mesh.name);
+    //         playerTankMeshes.unshift(mesh);
+    //         //m.position.x -= position;
+    //         mesh.position = new BABYLON.Vector3(0, 1, 0);
+    //         mesh.rotation.y += 3.14;
+    //         camera.target = mesh;
+    //     });
+    // };   
+
+    // playerTankLoadTask.onSuccess = tankLoaded;
+
+    // loader.onFinish = function() {
+    //     scene.registerBeforeRender(update);
+    //     engine.runRenderLoop(function () {
+    //         scene.render();
+    //     });
+    // };
+    // loader.load();
+
+    // if (cameraZ > meshesLoadedToZ) {
+    //             for (var ground of grounds) {
+    //                 ground.position.z += loadOffsetZ;
+    //             }    
+    //             meshesLoadedToZ += loadOffsetZ;
+
+    //             // var posXLeft = -30, posY = 0, posZ = meshesLoadedToZ,
+    //             //     posXRight = 30;
+
+    //             // for (var i = 0; i < 4; ++i) {
+    //             //     createHeightmap("terrain_01", 50, 50, posXLeft, posY, posZ);
+    //             //     createHeightmap("terrain_02", 50, 50, posXRight, posY, posZ);
+    //             //     posZ += 50;
+    //             // }  
+
+    //             // meshesLoadedToZ = posZ;
+    //         }
+
+    //         for (var mesh of playerTankMeshes) {
+    //         // console.log("Updating player tank Z position: " + playerTank.position.z);
+    //         // if (playerTank && playerTank.position) {
+    //             mesh.position.z += 0.001;
+    //         }
+
 });
