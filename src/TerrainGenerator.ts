@@ -1,15 +1,16 @@
 import {Dictionaries} from "./DictionaryBucket";
 import {Utils} from "./Utils";
 import {Loader} from "./Loader";
+import {Player} from "./Player";
 // export module TerrainGenerator {
 
 export class TerrainGenerator {
 
     private scene : BABYLON.Scene;
-
     private camera : BABYLON.TargetCamera;
-
     private loader : Loader;
+    private player : Player;
+
     private loadedMeshes : Dictionaries.DictionaryBucket;
 
     private routeWidth : number;
@@ -21,12 +22,14 @@ export class TerrainGenerator {
     private invisibleGrounds : Dictionaries.DictionaryBucket;
     private turnVisible : boolean;
 
-    constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader, routeWidth : number = 110, terrainWidth : number = 100,
-                numVisibleTerrains : number = 5) {
+    constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader, player : Player, 
+                routeWidth : number = 110, terrainWidth : number = 100, numVisibleTerrains : number = 5) {
         console.log("Initializing terrain generator");
         
         this.scene = scene;
         this.camera = camera;
+        this.player = player;
+
         this.routeWidth = routeWidth;
         this.terrainWidth = terrainWidth;
         this.numVisibleTerrains = numVisibleTerrains;
@@ -111,7 +114,7 @@ export class TerrainGenerator {
     private shouldUpdateTerrain() : boolean {
         var cameraZ = this.camera.position.z;
         var step = this.terrainWidth;
-        return cameraZ - this.lastTerrainUpdatePositionZ >= step;    
+        return this.lastTerrainUpdatePositionZ - this.player.getPosition().z <= step;    
     }
 
     private updateTerrain() {
@@ -120,7 +123,7 @@ export class TerrainGenerator {
             if (rnd <= 7) {
                 this.continueRoute();
             } else {
-                this.makeTurn();
+                // this.makeTurn();
             }
         }    
     }

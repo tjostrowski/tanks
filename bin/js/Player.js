@@ -31,6 +31,9 @@ define(["require", "exports"], function (require, exports) {
                 mesh.position.z += Player.MOVE_DELTA_Z;
             });
         }
+        getPosition() {
+            return this.playerMeshes[0].position;
+        }
         registerEvents() {
             var that = this;
             this.scene.actionManager = new BABYLON.ActionManager(this.scene);

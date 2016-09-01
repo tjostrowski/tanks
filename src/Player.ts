@@ -46,6 +46,10 @@ export class Player {
         });    
     }
 
+    public getPosition() : BABYLON.Vector3 {
+        return this.playerMeshes[0].position;
+    }
+
     private registerEvents() {
         var that = this;
         this.scene.actionManager = new BABYLON.ActionManager(this.scene);

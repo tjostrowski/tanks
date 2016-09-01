@@ -25,8 +25,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // createScene function that creates and return the scene
     var createScene = function() {
-        // camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 20, -50), scene);
-        camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0, 5, -20), scene);
+        camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 20, -50), scene);
+        // camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0, 5, -20), scene);
         // camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, 0, 0, BABYLON.Vector3.Zero(), scene);
         // (<BABYLON.ArcRotateCamera>camera).setPosition(new BABYLON.Vector3(0, 5, -20));
         // camera.setTarget(BABYLON.Vector3.Zero());
@@ -43,11 +43,13 @@ window.addEventListener('DOMContentLoaded', () => {
         light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(-1, -1, -1), scene);
 
         loader = new Loader(scene);
-        terrainGenerator = new TerrainGenerator(scene, camera, loader);
+
         player = new Player(scene, camera, loader);
 
-        terrainGenerator.load();
+        terrainGenerator = new TerrainGenerator(scene, camera, loader, player);
+
         player.load();
+        terrainGenerator.load();
 
         terrainGenerator.initOnScene();
         player.initOnScene();

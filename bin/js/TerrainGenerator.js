@@ -2,10 +2,11 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
     "use strict";
     // export module TerrainGenerator {
     class TerrainGenerator {
-        constructor(scene, camera, loader, routeWidth = 110, terrainWidth = 100, numVisibleTerrains = 5) {
+        constructor(scene, camera, loader, player, routeWidth = 110, terrainWidth = 100, numVisibleTerrains = 5) {
             console.log("Initializing terrain generator");
             this.scene = scene;
             this.camera = camera;
+            this.player = player;
             this.routeWidth = routeWidth;
             this.terrainWidth = terrainWidth;
             this.numVisibleTerrains = numVisibleTerrains;
@@ -72,7 +73,7 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
         shouldUpdateTerrain() {
             var cameraZ = this.camera.position.z;
             var step = this.terrainWidth;
-            return cameraZ - this.lastTerrainUpdatePositionZ >= step;
+            return this.lastTerrainUpdatePositionZ - this.player.getPosition().z <= step;
         }
         updateTerrain() {
             if (!this.turnVisible) {
@@ -81,7 +82,6 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
                     this.continueRoute();
                 }
                 else {
-                    this.makeTurn();
                 }
             }
         }

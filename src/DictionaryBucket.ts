@@ -141,7 +141,7 @@ export module Dictionaries {
             var removedArr = this.currentValueArray.splice(this.currentValuePos, 1);
             if (this.currentValueArray.length === 0) {
                 this.db.remove(this.currentKey);
-                if (this.dbKeys.length === 0) {
+                if (this.dbKeys.length === 0 || this.currentKeyPos > this.dbKeys.length - 1) {
                     this.currentKey = null;
                 } else {
                     this.currentKey = this.dbKeys[this.currentKeyPos];
