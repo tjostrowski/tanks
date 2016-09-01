@@ -14,11 +14,19 @@ define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader"], fun
         var useStaticScene = false;
         // createScene function that creates and return the scene
         var createScene = function () {
-            camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 5, -20), scene);
-            // camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0, 5, -20), scene);
+            // camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 20, -50), scene);
+            camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0, 5, -20), scene);
+            // camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, 0, 0, BABYLON.Vector3.Zero(), scene);
+            // (<BABYLON.ArcRotateCamera>camera).setPosition(new BABYLON.Vector3(0, 5, -20));
             // camera.setTarget(BABYLON.Vector3.Zero());
+            camera.minZ = 1;
+            camera.maxZ = 1000000;
+            // (<BABYLON.FreeCamera>camera).ellipsoid = new BABYLON.Vector3(1, 1, 1); 
+            // // (<BABYLON.FreeCamera>camera).applyGravity = true;
+            // scene.collisionsEnabled = true;
+            // (<BABYLON.FreeCamera>camera).checkCollisions = true;
             camera.attachControl(canvas, false);
-            light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
+            light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(-1, -1, -1), scene);
             loader = new Loader_1.Loader(scene);
             terrainGenerator = new TerrainGenerator_1.TerrainGenerator(scene, camera, loader);
             player = new Player_1.Player(scene, camera, loader);

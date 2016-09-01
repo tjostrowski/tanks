@@ -83,7 +83,7 @@ define(["require", "exports"], function (require, exports) {
                 this.currentKey = (this.dbKeys.length === 0) ? null : this.dbKeys[0];
                 this.currentKeyPos = 0;
                 this.currentValueArray = (this.dbKeys.length === 0) ? null : db.get(this.currentKey);
-                this.currentValuePos = 0;
+                this.currentValuePos = -1;
             }
             hasNext() {
                 if (this.currentKey === null) {
@@ -109,19 +109,40 @@ define(["require", "exports"], function (require, exports) {
                     return this.currentValueArray[this.currentValuePos];
                 }
                 // cannot move forward
+                this.currentKey = null;
                 return null;
             }
             removeCurrent() {
                 var removedArr = this.currentValueArray.splice(this.currentValuePos, 1);
-                if (this.currentValuePos > this.currentValueArray.length - 1) {
+                if (this.currentValueArray.length === 0) {
+                    this.db.remove(this.currentKey);
+                    if (this.dbKeys.length === 0) {
+                        this.currentKey = null;
+                    }
+                    else {
+                        this.currentKey = this.dbKeys[this.currentKeyPos];
+                        this.currentValueArray = this.db.get(this.currentKey);
+                        this.currentValuePos = -1;
+                    }
+                }
+                else if (this.currentValuePos > this.currentValueArray.length - 1) {
                     if (this.currentKeyPos < this.dbKeys.length - 1) {
                         this.currentKeyPos++;
                         this.currentKey = this.dbKeys[this.currentKeyPos];
                         this.currentValueArray = this.db.get(this.currentKey);
-                        this.currentValuePos = 0;
+                        this.currentValuePos = -1;
+                    }
+                    else {
+                        this.currentKey = null;
                     }
                 }
                 return removedArr[0];
+            }
+            moveToNextKey() {
+                this.currentKeyPos++;
+                this.currentKey = this.dbKeys[this.currentKeyPos];
+                this.currentValueArray = this.db.get(this.currentKey);
+                this.currentValuePos = -1;
             }
             getCurrentKey() {
                 return this.currentKey;

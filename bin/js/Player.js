@@ -38,12 +38,12 @@ define(["require", "exports"], function (require, exports) {
                 var key = evt.sourceEvent.key;
                 switch (key) {
                     case "a":
-                        this.playerMeshes.forEach(function (mesh) {
+                        that.playerMeshes.forEach(function (mesh) {
                             mesh.position.x -= Player.MOVE_DELTA_X;
                         });
                         break;
                     case "d":
-                        this.playerMeshes.forEach(function (mesh) {
+                        that.playerMeshes.forEach(function (mesh) {
                             mesh.position.x += Player.MOVE_DELTA_X;
                         });
                         break;
@@ -62,7 +62,7 @@ define(["require", "exports"], function (require, exports) {
         requestTurnRight() {
         }
     }
-    Player.MOVE_DELTA_X = 0.001;
-    Player.MOVE_DELTA_Z = 0.1;
+    Player.MOVE_DELTA_X = 0.1;
+    Player.MOVE_DELTA_Z = 1.6;
     exports.Player = Player;
 });

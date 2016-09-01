@@ -21,7 +21,7 @@ export class TerrainGenerator {
     private invisibleGrounds : Dictionaries.DictionaryBucket;
     private turnVisible : boolean;
 
-    constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader, routeWidth : number = 60, terrainWidth : number = 50,
+    constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader, routeWidth : number = 110, terrainWidth : number = 100,
                 numVisibleTerrains : number = 5) {
         console.log("Initializing terrain generator");
         
@@ -74,6 +74,13 @@ export class TerrainGenerator {
             this.loadedMeshes.add("terrain_03", clonedGroundMesh3);
             this.invisibleGrounds.add("terrain_03", clonedGroundMesh3);
         }
+
+        var it : Dictionaries.DictionaryBucketIterator = new Dictionaries.DictionaryBucketIterator(this.invisibleGrounds);
+        while (it.hasNext()) {
+            var mesh : BABYLON.AbstractMesh = it.next();
+            mesh.alwaysSelectAsActiveMesh = true;
+            // mesh.checkCollisions = true;
+        } 
 
         let endTime = new Date().getTime();
         console.log("Finished loading, loading took: " + (endTime - startTime) + " [ms]");

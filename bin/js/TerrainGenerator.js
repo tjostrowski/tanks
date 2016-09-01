@@ -2,7 +2,7 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
     "use strict";
     // export module TerrainGenerator {
     class TerrainGenerator {
-        constructor(scene, camera, loader, routeWidth = 60, terrainWidth = 50, numVisibleTerrains = 5) {
+        constructor(scene, camera, loader, routeWidth = 110, terrainWidth = 100, numVisibleTerrains = 5) {
             console.log("Initializing terrain generator");
             this.scene = scene;
             this.camera = camera;
@@ -44,6 +44,11 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
                 var clonedGroundMesh3 = this.loader.cloneMesh(groundMesh3, i + 1, invisiblePos);
                 this.loadedMeshes.add("terrain_03", clonedGroundMesh3);
                 this.invisibleGrounds.add("terrain_03", clonedGroundMesh3);
+            }
+            var it = new DictionaryBucket_1.Dictionaries.DictionaryBucketIterator(this.invisibleGrounds);
+            while (it.hasNext()) {
+                var mesh = it.next();
+                mesh.alwaysSelectAsActiveMesh = true;
             }
             let endTime = new Date().getTime();
             console.log("Finished loading, loading took: " + (endTime - startTime) + " [ms]");

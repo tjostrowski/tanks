@@ -7,8 +7,8 @@ export class Player {
 
     private playerMeshes : Array<BABYLON.AbstractMesh>;
 
-    private static MOVE_DELTA_X : number = 0.001;
-    private static MOVE_DELTA_Z : number = 0.1;
+    private static MOVE_DELTA_X : number = 0.1;
+    private static MOVE_DELTA_Z : number = 1.6;
 
     constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader) {
         this.scene = scene;
@@ -53,12 +53,12 @@ export class Player {
             var key = evt.sourceEvent.key;
             switch (key) {
                 case "a":   // move left
-                    this.playerMeshes.forEach(function (mesh) {
+                    that.playerMeshes.forEach(function (mesh) {
                         mesh.position.x -= Player.MOVE_DELTA_X; 
                     });
                     break;
                 case "d":   // move right
-                    this.playerMeshes.forEach(function (mesh) {
+                    that.playerMeshes.forEach(function (mesh) {
                         mesh.position.x += Player.MOVE_DELTA_X; 
                     });
                     break;
