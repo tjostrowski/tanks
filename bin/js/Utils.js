@@ -19,6 +19,9 @@ define(["require", "exports"], function (require, exports) {
             }
             return Utils.getRandomArrayElement(keys);
         }
+        static boolsMatching(b1, b2) {
+            return (b1 && b2) || (!b1 && !b2);
+        }
     }
     exports.Utils = Utils;
 });

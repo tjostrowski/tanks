@@ -22,4 +22,8 @@ export class Utils {
         }
         return Utils.getRandomArrayElement(keys);
     }
+
+    static boolsMatching(b1 : boolean, b2 : boolean) {
+        return (b1 && b2) || (!b1 && !b2);
+    }
 }

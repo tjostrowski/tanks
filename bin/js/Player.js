@@ -53,18 +53,30 @@ define(["require", "exports"], function (require, exports) {
                         });
                         break;
                     case "z":
-                        that.requestTurnLeft();
+                        that.requestTurn(true);
                         break;
                     case "c":
-                        that.requestTurnRight();
+                        that.requestTurn(false);
                         break;
                     default:
                 }
             }));
         }
-        requestTurnLeft() {
+        setTerrainGenerator(terrainGenerator) {
+            this.terrainGenerator = terrainGenerator;
         }
-        requestTurnRight() {
+        rotateY(angle) {
+            this.playerMeshes.forEach(function (mesh) {
+                mesh.rotation.y += angle;
+            });
+        }
+        resetToInitialPosition() {
+            this.playerMeshes.forEach(function (mesh) {
+                mesh.position = new BABYLON.Vector3(0, 1, 0);
+            });
+        }
+        requestTurn(isLeftTurn) {
+            var turnSucceeded = this.terrainGenerator.requestTurn(isLeftTurn);
         }
     }
     Player.MOVE_DELTA_X = 0.1;

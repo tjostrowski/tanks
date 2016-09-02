@@ -1,9 +1,12 @@
 import {Loader} from "./Loader";
+import {TerrainGenerator} from "./TerrainGenerator";
 
 export class Player {
     private scene : BABYLON.Scene;
     private camera : BABYLON.TargetCamera;
     private loader : Loader;
+
+    private terrainGenerator : TerrainGenerator;
 
     private playerMeshes : Array<BABYLON.AbstractMesh>;
 
@@ -69,19 +72,33 @@ export class Player {
                     });
                     break;
                 case "z":   // turn left
-                    that.requestTurnLeft();
+                    that.requestTurn(true);
                     break;
                 case "c":   // turn right
-                    that.requestTurnRight();
+                    that.requestTurn(false);
                     break;
                 default:                
             }    
         }));
     }
 
-    private requestTurnLeft() {
+    public setTerrainGenerator(terrainGenerator : TerrainGenerator) {
+        this.terrainGenerator = terrainGenerator;
     }
 
-    private requestTurnRight() {
+    public rotateY(angle : number) {
+        this.playerMeshes.forEach(function(mesh : BABYLON.AbstractMesh) {
+            mesh.rotation.y += angle;
+        });    
+    }
+
+    public resetToInitialPosition() {
+        this.playerMeshes.forEach(function(mesh : BABYLON.AbstractMesh) {
+            mesh.position = new BABYLON.Vector3(0, 1, 0);
+        });    
+    }
+
+    private requestTurn(isLeftTurn : boolean) : void {
+        var turnSucceeded = this.terrainGenerator.requestTurn(isLeftTurn);
     }
 }
