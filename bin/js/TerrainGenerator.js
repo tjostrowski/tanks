@@ -2,13 +2,14 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
     "use strict";
     // export module TerrainGenerator {
     class TerrainGenerator {
-        constructor(scene, camera, loader, player, routeWidth = 110, terrainWidth = 100, numVisibleTerrains = 5) {
+        constructor(scene, camera, loader, player, terrainWithRouteWidth = 120, terrainWidth = 100, numVisibleTerrains = 5) {
             console.log("Initializing terrain generator");
             this.scene = scene;
             this.camera = camera;
             this.player = player;
-            this.routeWidth = routeWidth;
+            this.terrainWithRouteWidth = terrainWithRouteWidth;
             this.terrainWidth = terrainWidth;
+            this.routeWidth = this.terrainWithRouteWidth - this.terrainWidth;
             this.numVisibleTerrains = numVisibleTerrains;
             this.turnVisible = false;
             this.loader = loader;
@@ -50,13 +51,14 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
             while (it.hasNext()) {
                 var mesh = it.next();
                 mesh.alwaysSelectAsActiveMesh = true;
+                mesh.checkCollisions = true;
             }
             let endTime = new Date().getTime();
             console.log("Finished loading, loading took: " + (endTime - startTime) + " [ms]");
         }
         initOnScene() {
             console.log("Init grounds on scene!");
-            var posXLeft = -this.routeWidth / 2, posY = 0, posZ = 0, posXRight = this.routeWidth / 2;
+            var posXLeft = -this.terrainWithRouteWidth / 2, posY = 0, posZ = 0, posXRight = this.terrainWithRouteWidth / 2;
             for (var i = 0; i < this.numVisibleTerrains; ++i) {
                 this.pickTerrain(posXLeft, posY, posZ);
                 this.pickTerrain(posXRight, posY, posZ);
@@ -78,10 +80,11 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
         updateTerrain() {
             if (!this.turnVisible) {
                 let rnd = Utils_1.Utils.random(1, 10);
-                if (rnd <= 7) {
+                if (rnd <= 1) {
                     this.continueRoute();
                 }
                 else {
+                    this.makeTurn();
                 }
             }
         }
@@ -98,37 +101,34 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
             }
         }
         makeTurn() {
-            console.log("Making new turn!");
             let rnd = Utils_1.Utils.random(1, 2);
             var turnLeft = (rnd == 1), turnRight = (rnd == 2);
-            var posXLeft = -this.routeWidth / 2, posY = 0, posZ = this.lastTerrainUpdatePositionZ, posXRight = this.routeWidth / 2;
+            var posXLeft = -this.terrainWithRouteWidth / 2, posY = 0, posZ = this.lastTerrainUpdatePositionZ, posXRight = this.terrainWithRouteWidth / 2;
+            console.log("Making new turn! " + ((turnLeft) ? "left" : "right"));
             if (turnLeft) {
                 this.pickTerrain(posXRight, posY, posZ);
-                posZ += this.terrainWidth;
-                this.pickTerrain(posXRight, posY, posZ);
-                this.pickTerrain(0, posY, posZ, this.routeWidth);
-                this.pickTerrain(posXLeft, posY, posZ);
+                posZ += this.routeWidth;
+                this.pickTerrain(posXLeft + this.routeWidth / 2, posY, posZ, this.terrainWidth + this.routeWidth);
             }
             else {
                 this.pickTerrain(posXLeft, posY, posZ);
-                posZ += this.terrainWidth;
-                this.pickTerrain(posXLeft, posY, posZ);
-                this.pickTerrain(0, posY, posZ, this.routeWidth);
-                this.pickTerrain(posXRight, posY, posZ);
+                posZ += this.routeWidth;
+                this.pickTerrain(posXRight - this.routeWidth / 2, posY, posZ, this.terrainWidth + this.routeWidth);
             }
             this.turnVisible = true;
         }
         continueRoute() {
             console.log("Continuing route!");
-            var posXLeft = -this.routeWidth / 2, posY = 0, posZ = this.lastTerrainUpdatePositionZ, posXRight = this.routeWidth / 2;
+            var posXLeft = -this.terrainWithRouteWidth / 2, posY = 0, posZ = this.lastTerrainUpdatePositionZ, posXRight = this.terrainWithRouteWidth / 2;
             this.pickTerrain(posXLeft, posY, posZ);
             this.pickTerrain(posXRight, posY, posZ);
             this.lastTerrainUpdatePositionZ += this.terrainWidth;
         }
-        pickTerrain(posX, posY, posZ, width = this.terrainWidth) {
+        pickTerrain(posX, posY, posZ, width = this.terrainWidth, height = this.terrainWidth) {
             var terrainName = Utils_1.Utils.getRandomDictionaryBucketKey(this.invisibleGrounds);
             var ground = this.invisibleGrounds.pick(terrainName);
-            // ground.scaling.z = width;
+            ground.scaling.x = width / this.terrainWidth;
+            ground.scaling.z = height / this.terrainWidth;
             ground.position = new BABYLON.Vector3(posX, posY, posZ);
             this.visibleGrounds.add(terrainName, ground);
             return ground;

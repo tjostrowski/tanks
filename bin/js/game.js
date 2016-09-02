@@ -21,10 +21,10 @@ define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader"], fun
             // camera.setTarget(BABYLON.Vector3.Zero());
             camera.minZ = 1;
             camera.maxZ = 1000000;
-            // (<BABYLON.FreeCamera>camera).ellipsoid = new BABYLON.Vector3(1, 1, 1); 
-            // // (<BABYLON.FreeCamera>camera).applyGravity = true;
-            // scene.collisionsEnabled = true;
-            // (<BABYLON.FreeCamera>camera).checkCollisions = true;
+            camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+            // (<BABYLON.FreeCamera>camera).applyGravity = true;
+            scene.collisionsEnabled = true;
+            camera.checkCollisions = true;
             camera.attachControl(canvas, false);
             light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(-1, -1, -1), scene);
             loader = new Loader_1.Loader(scene);

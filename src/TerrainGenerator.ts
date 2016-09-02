@@ -13,8 +13,9 @@ export class TerrainGenerator {
 
     private loadedMeshes : Dictionaries.DictionaryBucket;
 
-    private routeWidth : number;
+    private terrainWithRouteWidth : number;
     private terrainWidth : number;
+    private routeWidth : number;
     private numVisibleTerrains : number;
 
     private lastTerrainUpdatePositionZ : number;
@@ -23,15 +24,17 @@ export class TerrainGenerator {
     private turnVisible : boolean;
 
     constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader, player : Player, 
-                routeWidth : number = 110, terrainWidth : number = 100, numVisibleTerrains : number = 5) {
+                terrainWithRouteWidth : number = 120, terrainWidth : number = 100, numVisibleTerrains : number = 5) {
         console.log("Initializing terrain generator");
         
         this.scene = scene;
         this.camera = camera;
         this.player = player;
 
-        this.routeWidth = routeWidth;
+        this.terrainWithRouteWidth = terrainWithRouteWidth;
         this.terrainWidth = terrainWidth;
+        this.routeWidth = this.terrainWithRouteWidth - this.terrainWidth;
+
         this.numVisibleTerrains = numVisibleTerrains;
         
         this.turnVisible = false;
@@ -82,7 +85,7 @@ export class TerrainGenerator {
         while (it.hasNext()) {
             var mesh : BABYLON.AbstractMesh = it.next();
             mesh.alwaysSelectAsActiveMesh = true;
-            // mesh.checkCollisions = true;
+            mesh.checkCollisions = true;
         } 
 
         let endTime = new Date().getTime();
@@ -92,8 +95,8 @@ export class TerrainGenerator {
     public initOnScene() {
         console.log("Init grounds on scene!");
 
-        var posXLeft = -this.routeWidth/2, posY = 0, posZ = 0,
-            posXRight = this.routeWidth/2;
+        var posXLeft = -this.terrainWithRouteWidth/2, posY = 0, posZ = 0,
+            posXRight = this.terrainWithRouteWidth/2;
 
         for (var i = 0; i < this.numVisibleTerrains; ++i) {
             this.pickTerrain(posXLeft, posY, posZ);
@@ -120,10 +123,10 @@ export class TerrainGenerator {
     private updateTerrain() {
         if (!this.turnVisible) {
             let rnd : number = Utils.random(1, 10);
-            if (rnd <= 7) {
+            if (rnd <= 1) {
                 this.continueRoute();
             } else {
-                // this.makeTurn();
+                this.makeTurn();
             }
         }    
     }
@@ -142,28 +145,30 @@ export class TerrainGenerator {
     }
 
     private makeTurn() {
-        console.log("Making new turn!");
         let rnd : number = Utils.random(1, 2);
         var turnLeft : boolean = (rnd == 1), turnRight : boolean = (rnd == 2);
-        var posXLeft = -this.routeWidth/2, posY = 0, posZ = this.lastTerrainUpdatePositionZ,
-            posXRight = this.routeWidth/2;
+        var posXLeft = -this.terrainWithRouteWidth/2, posY = 0, posZ = this.lastTerrainUpdatePositionZ,
+            posXRight = this.terrainWithRouteWidth/2;
+        console.log("Making new turn! " + ((turnLeft) ? "left" : "right"));
 
         if (turnLeft) {
             this.pickTerrain(posXRight, posY, posZ);
         
-            posZ += this.terrainWidth;
+            posZ += this.routeWidth;
 
-            this.pickTerrain(posXRight, posY, posZ);
-            this.pickTerrain(0, posY, posZ, this.routeWidth);
-            this.pickTerrain(posXLeft, posY, posZ);
+            this.pickTerrain(posXLeft + this.routeWidth/2, posY, posZ, this.terrainWidth + this.routeWidth);
+            // this.pickTerrain(posXRight, posY, posZ);
+            // this.pickTerrain(0, posY, posZ, this.routeWidth - this.terrainWidth, this.routeWidth - this.terrainWidth);
+            // this.pickTerrain(posXLeft, posY, posZ);
         } else { // turnRight
             this.pickTerrain(posXLeft, posY, posZ);
         
-            posZ += this.terrainWidth;
+            posZ += this.routeWidth;
 
-            this.pickTerrain(posXLeft, posY, posZ);
-            this.pickTerrain(0, posY, posZ, this.routeWidth);
-            this.pickTerrain(posXRight, posY, posZ);
+            this.pickTerrain(posXRight - this.routeWidth/2, posY, posZ, this.terrainWidth + this.routeWidth);
+            // this.pickTerrain(posXLeft, posY, posZ);
+            // this.pickTerrain(0, posY, posZ, this.routeWidth - this.terrainWidth, this.routeWidth - this.terrainWidth);
+            // this.pickTerrain(posXRight, posY, posZ);
         }
 
         this.turnVisible = true;
@@ -172,8 +177,8 @@ export class TerrainGenerator {
     private continueRoute() {
         console.log("Continuing route!");
 
-        var posXLeft = -this.routeWidth/2, posY = 0, posZ = this.lastTerrainUpdatePositionZ,
-            posXRight = this.routeWidth/2;
+        var posXLeft = -this.terrainWithRouteWidth/2, posY = 0, posZ = this.lastTerrainUpdatePositionZ,
+            posXRight = this.terrainWithRouteWidth/2;
 
         this.pickTerrain(posXLeft, posY, posZ);
         this.pickTerrain(posXRight, posY, posZ);    
@@ -181,11 +186,13 @@ export class TerrainGenerator {
         this.lastTerrainUpdatePositionZ += this.terrainWidth;
     }
 
-    private pickTerrain(posX : number, posY : number, posZ : number, width : number = this.terrainWidth) : BABYLON.AbstractMesh {
+    private pickTerrain(posX : number, posY : number, posZ : number, width : number = this.terrainWidth, height : number = this.terrainWidth) 
+            : BABYLON.AbstractMesh {
         var terrainName = Utils.getRandomDictionaryBucketKey(this.invisibleGrounds);
-        var ground = this.invisibleGrounds.pick(terrainName);
+        var ground : BABYLON.AbstractMesh = this.invisibleGrounds.pick(terrainName);
 
-        // ground.scaling.z = width;
+        ground.scaling.x = width / this.terrainWidth;
+        ground.scaling.z = height / this.terrainWidth;
         ground.position = new BABYLON.Vector3(posX, posY, posZ);
         this.visibleGrounds.add(terrainName, ground);
 

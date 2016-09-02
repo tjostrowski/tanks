@@ -17,6 +17,7 @@ define(["require", "exports"], function (require, exports) {
                     that.playerMeshes.push(mesh);
                     mesh.position = new BABYLON.Vector3(0, 1, 0);
                     mesh.rotation.y += Math.PI;
+                    mesh.checkCollisions = true;
                     if (shouldSetCameraTarget && that.playerMeshes.length === 1) {
                         that.camera.target = mesh;
                     }
@@ -28,6 +29,7 @@ define(["require", "exports"], function (require, exports) {
         }
         update() {
             this.playerMeshes.forEach(function (mesh) {
+                // mesh.moveWithCollisions(new BABYLON.Vector3(0, 0, Player.MOVE_DELTA_Z));
                 mesh.position.z += Player.MOVE_DELTA_Z;
             });
         }

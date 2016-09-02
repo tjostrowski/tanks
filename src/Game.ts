@@ -33,10 +33,10 @@ window.addEventListener('DOMContentLoaded', () => {
         camera.minZ = 1;
         camera.maxZ = 1000000;
 
-        // (<BABYLON.FreeCamera>camera).ellipsoid = new BABYLON.Vector3(1, 1, 1); 
-        // // (<BABYLON.FreeCamera>camera).applyGravity = true;
-        // scene.collisionsEnabled = true;
-        // (<BABYLON.FreeCamera>camera).checkCollisions = true;
+        (<BABYLON.FreeCamera>camera).ellipsoid = new BABYLON.Vector3(1, 1, 1); 
+        // (<BABYLON.FreeCamera>camera).applyGravity = true;
+        scene.collisionsEnabled = true;
+        (<BABYLON.FreeCamera>camera).checkCollisions = true;
 
         camera.attachControl(canvas, false);
 

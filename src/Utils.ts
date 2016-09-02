@@ -15,7 +15,7 @@ export class Utils {
         return valueArray[rnd];
     }
 
-    static getRandomDictionaryBucketKey(db : Dictionaries.DictionaryBucket) {
+    static getRandomDictionaryBucketKey(db : Dictionaries.DictionaryBucket) : any {
         var keys = db.keys();
         if (keys.length == 0) {
             throw "getRandomDictionaryBucketKey : input array is empty";

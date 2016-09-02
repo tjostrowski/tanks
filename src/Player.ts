@@ -22,11 +22,12 @@ export class Player {
         var that = this;
         var shouldSetCameraTarget = that.camera instanceof BABYLON.FollowCamera; 
         var playerLoaded = function(task) {
-            task.loadedMeshes.forEach(function(mesh) {
+            task.loadedMeshes.forEach(function(mesh : BABYLON.AbstractMesh) {
                 console.log("Loaded player mesh! " + mesh.name);
                 that.playerMeshes.push(mesh);
                 mesh.position = new BABYLON.Vector3(0, 1, 0);
                 mesh.rotation.y += Math.PI;
+                mesh.checkCollisions = true;
 
                 if (shouldSetCameraTarget && that.playerMeshes.length === 1) {
                     (<BABYLON.FollowCamera>that.camera).target = mesh;
@@ -41,7 +42,8 @@ export class Player {
     }
 
     public update() {
-        this.playerMeshes.forEach(function(mesh) {
+        this.playerMeshes.forEach(function(mesh : BABYLON.AbstractMesh) {
+            // mesh.moveWithCollisions(new BABYLON.Vector3(0, 0, Player.MOVE_DELTA_Z));
             mesh.position.z += Player.MOVE_DELTA_Z;
         });    
     }
@@ -57,7 +59,7 @@ export class Player {
             var key = evt.sourceEvent.key;
             switch (key) {
                 case "a":   // move left
-                    that.playerMeshes.forEach(function (mesh) {
+                    that.playerMeshes.forEach(function (mesh : BABYLON.AbstractMesh) {
                         mesh.position.x -= Player.MOVE_DELTA_X; 
                     });
                     break;
