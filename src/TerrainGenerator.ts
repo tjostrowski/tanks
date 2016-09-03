@@ -133,17 +133,18 @@ export class TerrainGenerator {
             && playerPosZ <= this.turnStartZ + this.routeWidth + tolerance) {
 
             console.log("Turn within range, turning! " + ((isTurnLeft) ? "left" : "right"));
-            // // first check, just rotate player, NOT WORKING!
-            // if (isTurnLeft) {
-            //     this.player.rotateY(-Math.PI / 2);
-            // } else {
-            //     this.player.rotateY(Math.PI / 2);
-            // }  
+            // first check, just rotate player, NOT WORKING!
             if (isTurnLeft) {
-                this.requestTurnLeft();
+                this.player.rotateY(-Math.PI / 2);
             } else {
-                this.requestTurnRight();
-            }   
+                this.player.rotateY(Math.PI / 2);
+            }  
+            this.player.cameraFollowMe();
+            // if (isTurnLeft) {
+            //     this.requestTurnLeft();
+            // } else {
+            //     this.requestTurnRight();
+            // }   
 
             this.turnVisible = false;
 
@@ -192,6 +193,8 @@ export class TerrainGenerator {
     
         console.log("Found meshes to clone on left and right!");
 
+        this.player.resetToInitialPosition();
+
         it = new Dictionaries.DictionaryBucketIterator(this.visibleGrounds);
         while (it.hasNext()) {
             var mesh : BABYLON.AbstractMesh = it.next();
@@ -204,8 +207,6 @@ export class TerrainGenerator {
             mesh.position = this.invisiblePos;
         }    
         this.visibleGrounds.clear();
-
-        this.player.resetToInitialPosition();
 
         selectedMeshOnLeft.position = new BABYLON.Vector3(posXLeft, posY, 0);
         this.visibleGrounds.add(selectedMeshOnLeftName, selectedMeshOnLeft);
@@ -273,7 +274,7 @@ export class TerrainGenerator {
         this.lastTerrainUpdatePositionZ = posZ;
 
         this.turnVisible = true;
-        this.turnStartZ = posZ - this.routeWidth;
+        this.turnStartZ = posZ - this.routeWidth - this.terrainWidth / 2;
         this.isTurnLeft = isTurnLeft;
     }
 
@@ -300,6 +301,18 @@ export class TerrainGenerator {
         this.visibleGrounds.add(terrainName, ground);
 
         return ground;
+    }
+
+    public getRouteWidth() : number {
+        return this.routeWidth;
+    }
+
+    public getTerrainWidth() : number {
+        return this.terrainWidth;
+    }
+
+    public getNumVisibleTerrains() : number {
+        return this.numVisibleTerrains;
     }
 }
 

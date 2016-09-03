@@ -84,18 +84,19 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
                 && playerPosZ >= this.turnStartZ - tolerance
                 && playerPosZ <= this.turnStartZ + this.routeWidth + tolerance) {
                 console.log("Turn within range, turning! " + ((isTurnLeft) ? "left" : "right"));
-                // // first check, just rotate player, NOT WORKING!
-                // if (isTurnLeft) {
-                //     this.player.rotateY(-Math.PI / 2);
-                // } else {
-                //     this.player.rotateY(Math.PI / 2);
-                // }  
+                // first check, just rotate player, NOT WORKING!
                 if (isTurnLeft) {
-                    this.requestTurnLeft();
+                    this.player.rotateY(-Math.PI / 2);
                 }
                 else {
-                    this.requestTurnRight();
+                    this.player.rotateY(Math.PI / 2);
                 }
+                this.player.cameraFollowMe();
+                // if (isTurnLeft) {
+                //     this.requestTurnLeft();
+                // } else {
+                //     this.requestTurnRight();
+                // }   
                 this.turnVisible = false;
                 return true;
             }
@@ -135,6 +136,7 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
                     + " R=" + ((selectedMeshOnRight) ? "FOUND" : "NOT FOUND");
             }
             console.log("Found meshes to clone on left and right!");
+            this.player.resetToInitialPosition();
             it = new DictionaryBucket_1.Dictionaries.DictionaryBucketIterator(this.visibleGrounds);
             while (it.hasNext()) {
                 var mesh = it.next();
@@ -147,7 +149,6 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
                 mesh.position = this.invisiblePos;
             }
             this.visibleGrounds.clear();
-            this.player.resetToInitialPosition();
             selectedMeshOnLeft.position = new BABYLON.Vector3(posXLeft, posY, 0);
             this.visibleGrounds.add(selectedMeshOnLeftName, selectedMeshOnLeft);
             selectedMeshOnRight.position = new BABYLON.Vector3(posXRight + this.routeWidth / 2, posY, 0);
@@ -204,7 +205,7 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
             }
             this.lastTerrainUpdatePositionZ = posZ;
             this.turnVisible = true;
-            this.turnStartZ = posZ - this.routeWidth;
+            this.turnStartZ = posZ - this.routeWidth - this.terrainWidth / 2;
             this.isTurnLeft = isTurnLeft;
         }
         continueRoute() {
@@ -222,6 +223,15 @@ define(["require", "exports", "./DictionaryBucket", "./Utils"], function (requir
             ground.position = new BABYLON.Vector3(posX, posY, posZ);
             this.visibleGrounds.add(terrainName, ground);
             return ground;
+        }
+        getRouteWidth() {
+            return this.routeWidth;
+        }
+        getTerrainWidth() {
+            return this.terrainWidth;
+        }
+        getNumVisibleTerrains() {
+            return this.numVisibleTerrains;
         }
     }
     exports.TerrainGenerator = TerrainGenerator;

@@ -13,6 +13,8 @@ export class Player {
     private static MOVE_DELTA_X : number = 0.1;
     private static MOVE_DELTA_Z : number = 1.6;
 
+    private rotateDelta : number = Math.PI / 2;
+
     constructor(scene : BABYLON.Scene, camera : BABYLON.TargetCamera, loader : Loader) {
         this.scene = scene;
         this.camera = camera;
@@ -77,6 +79,18 @@ export class Player {
                 case "c":   // turn right
                     that.requestTurn(false);
                     break;
+                case "t":   // rotateY [clockwise]
+                    that.rotateY(that.rotateDelta);  
+                    break;
+                case "r":   // rotateY [counterclockwise]
+                    that.rotateY(-that.rotateDelta);
+                    break;
+                case "m":
+                    that.rotateDelta += 0.1;
+                    break; 
+                case "n":    
+                    that.rotateDelta -= 0.1;
+                    break;
                 default:                
             }    
         }));
@@ -96,6 +110,14 @@ export class Player {
         this.playerMeshes.forEach(function(mesh : BABYLON.AbstractMesh) {
             mesh.position = new BABYLON.Vector3(0, 1, 0);
         });    
+    }
+
+    public cameraFollowMe() {
+        if (this.camera instanceof BABYLON.FollowCamera && this.playerMeshes.length >= 1) {
+            var followCamera : BABYLON.FollowCamera = <BABYLON.FollowCamera>this.camera; 
+            var mesh1 = this.playerMeshes[0]; 
+            followCamera.target = mesh1; 
+        }
     }
 
     private requestTurn(isLeftTurn : boolean) : void {

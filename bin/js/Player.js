@@ -2,6 +2,7 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     class Player {
         constructor(scene, camera, loader) {
+            this.rotateDelta = Math.PI / 2;
             this.scene = scene;
             this.camera = camera;
             this.loader = loader;
@@ -58,6 +59,18 @@ define(["require", "exports"], function (require, exports) {
                     case "c":
                         that.requestTurn(false);
                         break;
+                    case "t":
+                        that.rotateY(that.rotateDelta);
+                        break;
+                    case "r":
+                        that.rotateY(-that.rotateDelta);
+                        break;
+                    case "m":
+                        that.rotateDelta += 0.1;
+                        break;
+                    case "n":
+                        that.rotateDelta -= 0.1;
+                        break;
                     default:
                 }
             }));
@@ -74,6 +87,13 @@ define(["require", "exports"], function (require, exports) {
             this.playerMeshes.forEach(function (mesh) {
                 mesh.position = new BABYLON.Vector3(0, 1, 0);
             });
+        }
+        cameraFollowMe() {
+            if (this.camera instanceof BABYLON.FollowCamera && this.playerMeshes.length >= 1) {
+                var followCamera = this.camera;
+                var mesh1 = this.playerMeshes[0];
+                followCamera.target = mesh1;
+            }
         }
         requestTurn(isLeftTurn) {
             var turnSucceeded = this.terrainGenerator.requestTurn(isLeftTurn);

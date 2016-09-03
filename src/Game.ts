@@ -1,6 +1,7 @@
 import {TerrainGenerator} from "./TerrainGenerator";
 import {Player} from "./Player";
 import {Loader} from "./Loader";
+import {Road} from "./Road";
 
 window.addEventListener('DOMContentLoaded', () => {
     // get the canvas DOM element
@@ -21,6 +22,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     var player : Player;
 
+    var road : Road;
+
+    // Set to TRUE if objects not moving is required
     var useStaticScene : boolean = false;
 
     // createScene function that creates and return the scene
@@ -31,7 +35,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // (<BABYLON.ArcRotateCamera>camera).setPosition(new BABYLON.Vector3(0, 5, -20));
         // camera.setTarget(BABYLON.Vector3.Zero());
         camera.minZ = 1;
-        camera.maxZ = 1000000;
+        camera.maxZ = 1000000; 
 
         (<BABYLON.FreeCamera>camera).ellipsoid = new BABYLON.Vector3(1, 1, 1); 
         // (<BABYLON.FreeCamera>camera).applyGravity = true;
@@ -49,11 +53,16 @@ window.addEventListener('DOMContentLoaded', () => {
         terrainGenerator = new TerrainGenerator(scene, camera, loader, player);
         player.setTerrainGenerator(terrainGenerator);
 
+        road = new Road(scene, player, terrainGenerator.getRouteWidth(), terrainGenerator.getTerrainWidth(),
+                        terrainGenerator.getNumVisibleTerrains());
+
         player.load();
         terrainGenerator.load();
+        road.load();
 
         terrainGenerator.initOnScene();
         player.initOnScene();
+        road.initOnScene();
 
         loader.registerOnFinishTask(function() {
             scene.registerBeforeRender(update);
@@ -69,6 +78,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (!useStaticScene) {
             player.update();
             terrainGenerator.update();
+            road.update();
         }        
     }
 

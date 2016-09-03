@@ -1,4 +1,4 @@
-define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader"], function (require, exports, TerrainGenerator_1, Player_1, Loader_1) {
+define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader", "./Road"], function (require, exports, TerrainGenerator_1, Player_1, Loader_1, Road_1) {
     "use strict";
     window.addEventListener('DOMContentLoaded', () => {
         // get the canvas DOM element
@@ -11,6 +11,8 @@ define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader"], fun
         var loader;
         var terrainGenerator;
         var player;
+        var road;
+        // Set to TRUE if objects not moving is required
         var useStaticScene = false;
         // createScene function that creates and return the scene
         var createScene = function () {
@@ -31,10 +33,13 @@ define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader"], fun
             player = new Player_1.Player(scene, camera, loader);
             terrainGenerator = new TerrainGenerator_1.TerrainGenerator(scene, camera, loader, player);
             player.setTerrainGenerator(terrainGenerator);
+            road = new Road_1.Road(scene, player, terrainGenerator.getRouteWidth(), terrainGenerator.getTerrainWidth(), terrainGenerator.getNumVisibleTerrains());
             player.load();
             terrainGenerator.load();
+            road.load();
             terrainGenerator.initOnScene();
             player.initOnScene();
+            road.initOnScene();
             loader.registerOnFinishTask(function () {
                 scene.registerBeforeRender(update);
                 engine.runRenderLoop(function () {
@@ -47,6 +52,7 @@ define(["require", "exports", "./TerrainGenerator", "./Player", "./Loader"], fun
             if (!useStaticScene) {
                 player.update();
                 terrainGenerator.update();
+                road.update();
             }
         };
         // call the createScene function
